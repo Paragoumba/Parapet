@@ -61,15 +61,15 @@ public class Parapet {
 
             HttpHandler readFileHandler = new FileHandler(settings);
 
-            server.createContext("/css/", readFileHandler);
-            server.createContext("/js/", httpExchange -> {
+            server.createContext("/css", readFileHandler);
+            server.createContext("/js", httpExchange -> {
 
                 httpExchange.getResponseHeaders().add("Content-Type", "application/javascript");
 
                 readFileHandler.handle(httpExchange);
 
             });
-            server.createContext("/imgs/", readFileHandler);
+            server.createContext("/imgs", readFileHandler);
 
             server.start();
 
