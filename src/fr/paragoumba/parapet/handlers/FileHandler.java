@@ -6,6 +6,7 @@ import fr.paragoumba.parapet.Settings;
 
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.util.zip.ZipFile;
 
 public class FileHandler extends Handler {
 
@@ -18,7 +19,33 @@ public class FileHandler extends Handler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
 
-        InputStream is = Parapet.class.getResourceAsStream(httpExchange.getRequestURI().getPath());
+        String requestedPath = httpExchange.getRequestURI().getPath();
+        String exePath = FileHandler.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+
+        if (exePath.endsWith(".jar") || exePath.endsWith(".zip")){
+
+            ZipFile zipFile = new ZipFile(exePath);
+
+            if (zipFile.getEntry(requestedPath).isDirectory()){
+
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, -1);
+                return;
+
+            }
+
+        } else {
+
+            File exeFile = new File(exePath);
+
+            if (exeFile.isFile() || new File(exeFile, requestedPath).isDirectory()){
+
+                httpExchange.sendResponseHeaders(HttpURLConnection.HTTP_FORBIDDEN, -1);
+                return;
+
+            }
+        }
+
+        InputStream is = Parapet.class.getResourceAsStream(requestedPath);
 
         if (is != null){
 
